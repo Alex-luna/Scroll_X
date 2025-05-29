@@ -16,6 +16,10 @@ total_steps_right = 5  # Número de steps para scroll à direita
 pressed_keys = set()
 scroll_lock = threading.Lock()
 
+# Teclas para scroll lateral
+LEFT_KEYS = [',', "'", ';']
+RIGHT_KEYS = ['.', ':', '"']
+
 def ease_in_out(t):
     # Ease in-out usando função seno
     return 0.5 * (1 - math.cos(math.pi * t))
@@ -168,13 +172,13 @@ def on_press(key):
         if not scroll_lock.locked():
             print("[LOG] Detected K, iniciando scroll thread para cima")
             threading.Thread(target=smooth_scroll, args=(Key.up,), daemon=True).start()
-    elif key == keyboard.KeyCode.from_char(',') or key == keyboard.KeyCode.from_char("'"):
+    elif isinstance(key, keyboard.KeyCode) and key.char in LEFT_KEYS:
         if not scroll_lock.locked():
-            print("[LOG] Detected < (vírgula ou aspas simples), iniciando scroll thread para esquerda")
+            print(f"[LOG] Detected {key.char} (scroll esquerda), iniciando scroll thread para esquerda")
             threading.Thread(target=smooth_scroll_custom, args=(Key.left, total_steps_left), daemon=True).start()
-    elif key == keyboard.KeyCode.from_char('.') or key == keyboard.KeyCode.from_char(':'):
+    elif isinstance(key, keyboard.KeyCode) and key.char in RIGHT_KEYS:
         if not scroll_lock.locked():
-            print("[LOG] Detected > (ponto ou dois pontos), iniciando scroll thread para direita")
+            print(f"[LOG] Detected {key.char} (scroll direita), iniciando scroll thread para direita")
             threading.Thread(target=smooth_scroll_custom, args=(Key.right, total_steps_right), daemon=True).start()
     elif key == keyboard.KeyCode.from_char('p'):
         print("[LOG] Detected P, simulando Alt+3")
