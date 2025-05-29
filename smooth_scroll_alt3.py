@@ -17,8 +17,8 @@ pressed_keys = set()
 scroll_lock = threading.Lock()
 
 # Teclas para scroll lateral
-LEFT_KEYS = [',', "'", ';']
-RIGHT_KEYS = ['.', ':', '"']
+LEFT_KEYS = [',', ';']
+RIGHT_KEYS = ['.' ,"'"]
 
 def ease_in_out(t):
     # Ease in-out usando função seno
