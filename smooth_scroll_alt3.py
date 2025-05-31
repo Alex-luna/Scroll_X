@@ -4,6 +4,14 @@ import time
 import math
 import threading
 import Quartz
+import os
+import datetime
+import mss
+import cv2
+import numpy as np
+import platform
+import subprocess
+import shutil
 
 keyboard_controller = Controller()
 
@@ -20,6 +28,15 @@ scroll_lock = threading.Lock()
 LEFT_KEYS = [',', ';']
 RIGHT_KEYS = ['.' ,"'"]
 RIGHT_KEYCODES = [39]  # keycode para ' (aspas simples)
+
+# Diretório para salvar o vídeo
+#VIDEO_OUTPUT_DIR = "/Users/alexluna/Desktop/videos"  # <-- Altere para o diretório desejado
+#VIDEO_OUTPUT_DIR = "/tmp"  # <-- Altere para o diretório desejado
+VIDEO_OUTPUT_DIR = "/Users/alexluna/Library/CloudStorage/GoogleDrive-alex.luna.costa@gmail.com/My Drive/[02] Resources/[06] Images/Screenshot Funnel/Print_x/Snaps"  # <-- Altere para o diretório desejado
+
+# Configurações de vídeo
+VIDEO_DURATION = 3  # segundos de gravação (altere aqui)
+VIDEO_FPS = 24      # frames por segundo (altere aqui)
 
 def ease_in_out(t):
     # Ease in-out usando função seno
@@ -159,6 +176,60 @@ def smooth_scroll_custom(key, steps):
             press_key_quartz(keycode)
     print(f"[LOG] Scroll suave finalizado para key={key}")
 
+def beep():
+    # Sinal sonoro cross-platform
+    if platform.system() == "Darwin":
+        os.system('afplay /System/Library/Sounds/Glass.aiff')
+    elif platform.system() == "Windows":
+        import winsound
+        winsound.Beep(1000, 200)
+    else:
+        os.system('paplay /usr/share/sounds/freedesktop/stereo/complete.oga 2>/dev/null || beep')
+
+def record_screen_video(duration=VIDEO_DURATION, fps=VIDEO_FPS):
+    beep()
+    print(f"[LOG] Iniciando gravação de vídeo da tela... duração={duration}s, fps={fps}")
+    now = datetime.datetime.now()
+    base_filename = f"Vid_{now.strftime('%d_%m_%y-%H_%M')}"
+    frames_dir = os.path.join("/tmp", base_filename + "_frames")
+    os.makedirs(frames_dir, exist_ok=True)
+    final_filename = base_filename + ".mp4"
+    final_path = os.path.join(VIDEO_OUTPUT_DIR, final_filename)
+    start_time = time.time()
+    frame_count = 0
+    with mss.mss() as sct:
+        monitor = sct.monitors[1]
+        while (time.time() - start_time) < duration:
+            img = np.array(sct.grab(monitor))
+            frame = cv2.cvtColor(img, cv2.COLOR_BGRA2BGR)
+            frame_path = os.path.join(frames_dir, f"frame_{frame_count:04d}.png")
+            cv2.imwrite(frame_path, frame)
+            frame_count += 1
+    elapsed = time.time() - start_time
+    real_fps = frame_count / elapsed
+    print(f"[DEBUG] Frames gravados: {frame_count} | Duração real: {elapsed:.2f}s | FPS real: {real_fps:.2f} | Pasta: {frames_dir}")
+    if frame_count == 0:
+        print(f"[ERRO] Nenhum frame foi salvo!")
+        beep()
+        return
+    print(f"[LOG] Montando vídeo com ffmpeg...")
+    try:
+        subprocess.run([
+            "ffmpeg", "-y",
+            "-framerate", f"{real_fps:.2f}",
+            "-i", os.path.join(frames_dir, "frame_%04d.png"),
+            "-r", str(fps),  # força o vídeo final a ter o FPS desejado
+            "-vcodec", "libx264", "-pix_fmt", "yuv420p", final_path
+        ], check=True)
+        print(f"[LOG] Conversão concluída. Limpando frames temporários: {frames_dir}")
+        shutil.rmtree(frames_dir)
+    except Exception as e:
+        print(f"[ERRO] Erro ao montar vídeo com ffmpeg: {e}")
+        beep()
+        return
+    beep()
+    print(f"[LOG] Gravação finalizada. Vídeo salvo em: {final_path}")
+
 def on_press(key):
     print(f"[DEBUG] key: {key}, key.char: {getattr(key, 'char', None)}")
     pressed_keys.add(key)
@@ -190,6 +261,9 @@ def on_press(key):
     elif key == keyboard.KeyCode.from_char('i'):
         print("[LOG] Detected I, simulando Esc")
         threading.Thread(target=press_esc, daemon=True).start()
+    elif key == keyboard.KeyCode.from_char('g'):
+        print("[LOG] Detected G, iniciando gravação de vídeo da tela")
+        threading.Thread(target=record_screen_video, daemon=True).start()
     # Nunca retorna False aqui, para manter o listener ativo
 
 def on_release(key):

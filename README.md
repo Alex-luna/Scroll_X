@@ -1,9 +1,28 @@
-# Smooth Scroll & Hotkey Simulator (macOS)
+# Smooth Scroll & Screen Recorder
 
-Este projeto é um script Python para macOS que permite:
-- Simular scroll suave usando atalhos personalizados
-- Simular combinações de teclas comuns (Command+S, Esc, Option+3)
-- Encerrar o script facilmente por atalho
+Este script permite:
+- Scroll suave com teclas customizadas
+- Simulação de atalhos (Alt+3, Cmd+S, Esc)
+- Gravação de vídeo da tela por 3 segundos ao pressionar a tecla **G** (com sinal sonoro no início e fim)
+
+## Instalação de dependências
+
+```bash
+pip install -r requirements.txt
+```
+
+## Dependências
+- pynput
+- Quartz (macOS)
+- mss
+- opencv-python
+- numpy
+
+## Como usar
+- Pressione **G** para gravar 3 segundos da tela. O vídeo será salvo no diretório configurado na variável `VIDEO_OUTPUT_DIR` com o nome `Vid_dd_MM_YY-HH_mm.mp4`.
+- Sinais sonoros são emitidos no início e fim da gravação.
+
+Edite o caminho em `VIDEO_OUTPUT_DIR` no código para escolher onde salvar os vídeos.
 
 ## Funcionalidades
 

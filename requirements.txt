@@ -1,2 +1,5 @@
 pynput
-pyobjc-framework-Quartz 
+pyobjc-framework-Quartz
+mss
+opencv-python
+numpy 
