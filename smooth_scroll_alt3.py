@@ -35,7 +35,7 @@ RIGHT_KEYCODES = [39]  # keycode para ' (aspas simples)
 VIDEO_OUTPUT_DIR = "/Users/alexluna/Library/CloudStorage/GoogleDrive-alex.luna.costa@gmail.com/My Drive/[02] Resources/[06] Images/Screenshot Funnel/Print_x/Snaps"  # <-- Altere para o diretório desejado
 
 # Configurações de vídeo
-VIDEO_DURATION = 3  # segundos de gravação (altere aqui)
+VIDEO_DURATION = 4  # segundos de gravação (altere aqui)
 VIDEO_FPS = 24      # frames por segundo (altere aqui)
 
 # Mapeamento de teclas para funções
@@ -263,6 +263,7 @@ def on_press(key):
     print(f"[DEBUG] key: {key}, key.char: {getattr(key, 'char', None)}")
     pressed_keys.add(key)
     if key == keyboard.KeyCode.from_char(KEY_QUIT):
+        beep()  # Sinal sonoro ao sair
         print("Q detectado. Encerrando o programa.")
         return False  # Encerra o listener
     if key == keyboard.KeyCode.from_char(KEY_SCROLL_DOWN):
@@ -301,6 +302,7 @@ def on_release(key):
         pressed_keys.remove(key)
 
 def main():
+    beep()  # Sinal sonoro ao iniciar o programa
     print("Pressione K para cima, L para baixo, P para Alt+3, O para Command+S, I para Esc, Q para sair (Ctrl+C para sair)")
     with keyboard.Listener(on_press=on_press, on_release=on_release) as listener:
         listener.join()
