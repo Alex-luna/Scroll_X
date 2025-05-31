@@ -38,23 +38,6 @@ VIDEO_OUTPUT_DIR = "/Users/alexluna/Library/CloudStorage/GoogleDrive-alex.luna.c
 VIDEO_DURATION = 3  # segundos de gravação (altere aqui)
 VIDEO_FPS = 24      # frames por segundo (altere aqui)
 
-# Mapeamento de teclas para funções
-KEY_SCROLL_DOWN = 'l'
-KEY_SCROLL_UP = 'k'
-KEY_SCROLL_LEFT = ','
-KEY_SCROLL_LEFT_ALT = ';'
-KEY_SCROLL_RIGHT = '.'
-KEY_SCROLL_RIGHT_ALT = "'"
-KEY_ALT_3 = 'p'
-KEY_CMD_S = 'o'
-KEY_ESC = 'i'
-KEY_RECORD_VIDEO = 'g'
-KEY_SCREENSHOT = 'p'  # P agora tira screenshot
-KEY_QUIT = 'q'
-
-# Diretório para screenshots
-SCREENSHOT_OUTPUT_DIR = "/Users/alexluna/Library/CloudStorage/GoogleDrive-alex.luna.costa@gmail.com/My Drive/[02] Resources/[06] Images/Screenshot Funnel/Print_x/screenshots"
-
 def ease_in_out(t):
     # Ease in-out usando função seno
     return 0.5 * (1 - math.cos(math.pi * t))
@@ -247,50 +230,38 @@ def record_screen_video(duration=VIDEO_DURATION, fps=VIDEO_FPS):
     beep()
     print(f"[LOG] Gravação finalizada. Vídeo salvo em: {final_path}")
 
-def take_screenshot():
-    print(f"[LOG] Tirando screenshot da tela...")
-    now = datetime.datetime.now()
-    filename = f"Screenshot_{now.strftime('%d_%m_%y-%H_%M_%S')}.png"
-    final_path = os.path.join(SCREENSHOT_OUTPUT_DIR, filename)
-    with mss.mss() as sct:
-        monitor = sct.monitors[1]
-        img = np.array(sct.grab(monitor))
-        cv2.imwrite(final_path, cv2.cvtColor(img, cv2.COLOR_BGRA2BGR))
-    beep()
-    print(f"[LOG] Screenshot salva em: {final_path}")
-
 def on_press(key):
     print(f"[DEBUG] key: {key}, key.char: {getattr(key, 'char', None)}")
     pressed_keys.add(key)
-    if key == keyboard.KeyCode.from_char(KEY_QUIT):
+    if key == keyboard.KeyCode.from_char('q'):
         print("Q detectado. Encerrando o programa.")
         return False  # Encerra o listener
-    if key == keyboard.KeyCode.from_char(KEY_SCROLL_DOWN):
+    if key == keyboard.KeyCode.from_char('l'):
         if not scroll_lock.locked():
             print("[LOG] Detected L, iniciando scroll thread para baixo")
             threading.Thread(target=smooth_scroll, args=(Key.down,), daemon=True).start()
-    elif key == keyboard.KeyCode.from_char(KEY_SCROLL_UP):
+    elif key == keyboard.KeyCode.from_char('k'):
         if not scroll_lock.locked():
             print("[LOG] Detected K, iniciando scroll thread para cima")
             threading.Thread(target=smooth_scroll, args=(Key.up,), daemon=True).start()
-    elif isinstance(key, keyboard.KeyCode) and key.char in [KEY_SCROLL_LEFT, KEY_SCROLL_LEFT_ALT]:
+    elif isinstance(key, keyboard.KeyCode) and key.char in LEFT_KEYS:
         if not scroll_lock.locked():
             print(f"[LOG] Detected {key.char} (scroll esquerda), iniciando scroll thread para esquerda")
             threading.Thread(target=smooth_scroll_custom, args=(Key.left, total_steps_left), daemon=True).start()
-    elif (isinstance(key, keyboard.KeyCode) and key.char in [KEY_SCROLL_RIGHT, KEY_SCROLL_RIGHT_ALT]) or (hasattr(key, 'vk') and key.vk in RIGHT_KEYCODES):
+    elif (isinstance(key, keyboard.KeyCode) and key.char in RIGHT_KEYS) or (hasattr(key, 'vk') and key.vk in RIGHT_KEYCODES):
         if not scroll_lock.locked():
             print(f"[LOG] Detected {getattr(key, 'char', key)}, (scroll direita), iniciando scroll thread para direita")
             threading.Thread(target=smooth_scroll_custom, args=(Key.right, total_steps_right), daemon=True).start()
-    elif key == keyboard.KeyCode.from_char(KEY_SCREENSHOT):
-        print("[LOG] Detected P, tirando screenshot da tela")
-        threading.Thread(target=take_screenshot, daemon=True).start()
-    elif key == keyboard.KeyCode.from_char(KEY_CMD_S):
+    elif key == keyboard.KeyCode.from_char('p'):
+        print("[LOG] Detected P, simulando Alt+3")
+        threading.Thread(target=press_alt_3, daemon=True).start()
+    elif key == keyboard.KeyCode.from_char('o'):
         print("[LOG] Detected O, simulando Command+S")
         threading.Thread(target=press_cmd_s, daemon=True).start()
-    elif key == keyboard.KeyCode.from_char(KEY_ESC):
+    elif key == keyboard.KeyCode.from_char('i'):
         print("[LOG] Detected I, simulando Esc")
         threading.Thread(target=press_esc, daemon=True).start()
-    elif key == keyboard.KeyCode.from_char(KEY_RECORD_VIDEO):
+    elif key == keyboard.KeyCode.from_char('g'):
         print("[LOG] Detected G, iniciando gravação de vídeo da tela")
         threading.Thread(target=record_screen_video, daemon=True).start()
     # Nunca retorna False aqui, para manter o listener ativo
