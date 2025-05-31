@@ -204,7 +204,7 @@ def beep():
         os.system('paplay /usr/share/sounds/freedesktop/stereo/complete.oga 2>/dev/null || beep')
 
 def record_screen_video(duration=VIDEO_DURATION, fps=VIDEO_FPS):
-    beep()
+    threading.Thread(target=beep, daemon=True).start()  # Beep inicial em paralelo
     print(f"[LOG] Iniciando gravação de vídeo da tela... duração={duration}s, fps={fps}")
     now = datetime.datetime.now()
     base_filename = f"Vid_{now.strftime('%d_%m_%y-%H_%M')}"
@@ -248,6 +248,7 @@ def record_screen_video(duration=VIDEO_DURATION, fps=VIDEO_FPS):
     print(f"[LOG] Gravação finalizada. Vídeo salvo em: {final_path}")
 
 def take_screenshot():
+    threading.Thread(target=beep, daemon=True).start()  # Beep inicial em paralelo
     print(f"[LOG] Tirando screenshot da tela...")
     now = datetime.datetime.now()
     filename = f"Screenshot_{now.strftime('%d_%m_%y-%H_%M_%S')}.png"
@@ -256,7 +257,6 @@ def take_screenshot():
         monitor = sct.monitors[1]
         img = np.array(sct.grab(monitor))
         cv2.imwrite(final_path, cv2.cvtColor(img, cv2.COLOR_BGRA2BGR))
-    beep()
     print(f"[LOG] Screenshot salva em: {final_path}")
 
 def on_press(key):
