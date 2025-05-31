@@ -46,9 +46,9 @@ KEY_SCROLL_LEFT_ALT = ';'
 KEY_SCROLL_RIGHT = '.'
 KEY_SCROLL_RIGHT_ALT = "'"
 KEY_ALT_3 = 'p'
-KEY_CMD_S = 'o'
+KEY_CMD_S = '-'
 KEY_ESC = 'i'
-KEY_RECORD_VIDEO = 'g'
+KEY_RECORD_VIDEO = ['g', 'o']
 KEY_SCREENSHOT = 'p'  # P agora tira screenshot
 KEY_QUIT = 'q'
 
@@ -290,8 +290,8 @@ def on_press(key):
     elif key == keyboard.KeyCode.from_char(KEY_ESC):
         print("[LOG] Detected I, simulando Esc")
         threading.Thread(target=press_esc, daemon=True).start()
-    elif key == keyboard.KeyCode.from_char(KEY_RECORD_VIDEO):
-        print("[LOG] Detected G, iniciando gravação de vídeo da tela")
+    elif isinstance(key, keyboard.KeyCode) and key.char in KEY_RECORD_VIDEO:
+        print("[LOG] Detected G/O, iniciando gravação de vídeo da tela")
         threading.Thread(target=record_screen_video, daemon=True).start()
     # Nunca retorna False aqui, para manter o listener ativo
 
